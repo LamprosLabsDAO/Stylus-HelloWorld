@@ -142,63 +142,66 @@ Confirmed tx 0x0bdb…3307, gas used 14044638
 
 Once both steps are successful, you can interact with your program as you would with any Ethereum smart contract.
 
-## Calling Your Program
 
-This template includes an example of how to call and transact with your program in Rust using [ethers-rs](https://github.com/gakonst/ethers-rs) under the `examples/counter.rs`. However, your programs are also Ethereum ABI equivalent if using the Stylus SDK. **They can be called and transacted with using any other Ethereum tooling.**
+## Option-2 Deploy using Docker Image
 
-By using the program address from your deployment step above, and your wallet, you can attempt to call the counter program and increase its value in storage:
+If you don't have Docker installed, you need to first install Docker. Follow these steps:
 
-```rs
-abigen!(
-    Counter,
-    r#"[
-        function number() external view returns (uint256)
-        function setNumber(uint256 number) external
-        function increment() external
-    ]"#
-);
-let counter = Counter::new(address, client);
-let num = counter.number().call().await;
-println!("Counter number value = {:?}", num);
+### Install Docker
 
-let _ = counter.increment().send().await?.await?;
-println!("Successfully incremented counter via a tx");
+1. **Windows and Mac:**
+   - Download and install Docker Desktop from [Docker's official website](https://www.docker.com/products/docker-desktop).
+   - Follow the installation instructions and start Docker Desktop.
 
-let num = counter.number().call().await;
-println!("New counter number value = {:?}", num);
+2. **Linux:**
+   - Install Docker using the package manager for your distribution. For example, on Ubuntu, you can use the following commands:
+     ```bash
+     sudo apt-get update
+     sudo apt-get install docker.io
+     ```
+   - Start Docker service:
+     ```bash
+     sudo systemctl start docker
+     sudo systemctl enable docker
+     ```
+
+### Deploy Using Docker Image
+
+1. Run the Docker command to deploy:
+   ```bash
+   docker run --rm -e PRIVATE_KEY=YOUR_PRIVATE_KEY deepakxyz/stylus-deployment:1.0.0
+
+   Replace YOUR_PRIVATE_KEY with your actual private key
+
+
+## Interaction with the deployed contract
+
+1. copy you contract address
+2. copy this contract code in solidity
+```
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.13;
+
+contract Counter {
+    uint256 public number;
+
+    function setNumber(uint256 newNumber) public {
+        number = newNumber;
+    }
+
+    function increment() public {
+        number++;
+    }
+}
 ```
 
-Before running, set the following env vars or place them in a `.env` file (see: [.env.example](./.env.example)) in this project:
+3. open https://remix.ethereum.org/
+4. create a file name StylusHelloWorld.sol and paste the contract
+5. connect to Arbitrum network
+6. compile the contract
+7. paste the contract adderess in At Address field.
+8. now you can Interact with the functions.
 
-```
-RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
-STYLUS_CONTRACT_ADDRESS=<the onchain address of your deployed program>
-PRIV_KEY_PATH=<the file path for your priv key to transact with>
-```
-
-Next, run:
-
-```
-cargo run --example counter --target=<YOUR_ARCHITECTURE>
-```
-
-Where you can find `YOUR_ARCHITECTURE` by running `rustc -vV | grep host`. For M1 Apple computers, for example, this is `aarch64-apple-darwin` and for most Linux x86 it is `x86_64-unknown-linux-gnu`
-
-## Build Options
-
-By default, the cargo stylus tool will build your project for WASM using sensible optimizations, but you can control how this gets compiled by seeing the full README for [cargo stylus](https://github.com/OffchainLabs/cargo-stylus). If you wish to optimize the size of your compiled WASM, see the different options available [here](https://github.com/OffchainLabs/cargo-stylus/blob/main/OPTIMIZING_BINARIES.md).
-
-## Peeking Under the Hood
-
-The [stylus-sdk](https://github.com/OffchainLabs/stylus-sdk-rs) contains many features for writing Stylus programs in Rust. It also provides helpful macros to make the experience for Solidity developers easier. These macros expand your code into pure Rust code that can then be compiled to WASM. If you want to see what the `stylus-hello-world` boilerplate expands into, you can use `cargo expand` to see the pure Rust code that will be deployed onchain.
-
-First, run `cargo install cargo-expand` if you don't have the subcommand already, then:
-
-```
-cargo expand --all-features --release --target=<YOUR_ARCHITECTURE>
-```
-
-Where you can find `YOUR_ARCHITECTURE` by running `rustc -vV | grep host`. For M1 Apple computers, for example, this is `aarch64-apple-darwin`.
 
 ## License
 
